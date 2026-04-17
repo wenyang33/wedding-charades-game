@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💒 你比划我猜 - 婚礼派对游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 30%, #f48fb1 60%, #ec407a 100%);
+            min-height: 100vh;
+            color: #4a1a2e;
+        }
+
+        /* ========== 主页面 ========== */
+        .main-page {
+            padding: 20px 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 3.2em;
+            color: #fff;
+            text-shadow: 2px 2px 8px rgba(180, 40, 80, 0.5);
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 1px 1px 4px rgba(180, 40, 80, 0.3);
+        }
+
+        .rules-btn {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #ec407a;
+            color: #c2185b;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+            font-weight: bold;
+        }
+
+        .rules-btn:hover {
+            background: #ec407a;
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        /* ========== 游戏规则弹窗 ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 50px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            font-size: 2em;
+            color: #c2185b;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-content .rule-item {
+            font-size: 1.15em;
+            line-height: 2;
+            color: #555;
+            padding-left: 10px;
+        }
+
+        .modal-content .rule-item strong {
+            color: #c2185b;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.8em;
+            color: #aaa;
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #c2185b;
+        }
+
+        .teams-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            padding: 30px;
+            width: 320px;
+            box-shadow: 0 8px 32px rgba(180, 40, 80, 0.15);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .team-card .team-icon {
+            font-size: 2.5em;
+            margin-bottom: 8px;
+        }
+
+        .team-name-display {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #c2185b;
+            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 10px;
+            transition: background 0.3s;
+            display: inline-block;
+            min-width: 120px;
+        }
+
+        .team-name-display:hover {
+            background: #fce4ec;
+        }
+
+        .team-name-input {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #c2185b;
+            text-align: center;
+            border: 2px dashed #f48fb1;
+            border-radius: 10px;
+            padding: 5px 15px;
+            width: 90%;
+            outline: none;
+            background: #fff5f8;
+            display: none;
+        }
+
+        .team-name-input:focus {
+            border-color: #ec407a;
+        }
+
+        .score-section {
+            margin: 15px 0;
+        }
+
+        .score-section label {
+            font-size: 1em;
+            color: #888;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .score-input {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #c2185b;
+            text-align: center;
+            border: none;
+            border-bottom: 3px solid #f48fb1;
+            width: 90px;
+            outline: none;
+            background: transparent;
+        }
+
+        .score-input:focus {
+            border-bottom-color: #c2185b;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #ec407a, #d81b60);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.15em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(135deg, #d81b60, #ad1457);
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(216, 27, 96, 0.4);
+        }
+
+        /* ========== 游戏界面 ========== */
+        .game-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 50%, #f48fb1 100%);
+            z-index: 500;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .game-page.active {
+            display: flex;
+        }
+
+        .game-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+        }
+
+        .game-team-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #c2185b;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 25px;
+            border-radius: 20px;
+        }
+
+        .game-timer {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #fff;
+            background: #c2185b;
+            padding: 8px 30px;
+            border-radius: 20px;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .game-timer.warning {
+            animation: pulse 1s infinite;
+            background: #d32f2f;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .game-stats {
+            font-size: 1.2em;
+            color: #fff;
+            background: rgba(194, 24, 91, 0.7);
+            padding: 8px 20px;
+            border-radius: 15px;
+        }
+
+        .word-display {
+            font-size: 6em;
+            font-weight: bold;
+            color: #c2185b;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 80px;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(180, 40, 80, 0.2);
+            margin: 20px 0;
+            min-width: 400px;
+            text-align: center;
+            letter-spacing: 10px;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .game-btn {
+            padding: 18px 50px;
+            font-size: 1.6em;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            letter-spacing: 3px;
+        }
+
+        .btn-correct {
+            background: linear-gradient(135deg, #66bb6a, #43a047);
+            color: white;
+        }
+
+        .btn-correct:hover {
+            background: linear-gradient(135deg, #43a047, #2e7d32);
+            transform: scale(1.05);
+        }
+
+        .btn-pass {
+            background: linear-gradient(135deg, #ffa726, #ef6c00);
+            color: white;
+        }
+
+        .btn-pass:hover {
+            background: linear-gradient(135deg, #ef6c00, #e65100);
+            transform: scale(1.05);
+        }
+
+        .btn-pass:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-end {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #c2185b;
+            border: 2px solid #c2185b;
+            padding: 10px 25px;
+            font-size: 1.1em;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-end:hover {
+            background: #c2185b;
+            color: white;
+        }
+
+        .btn-pause {
+            position: absolute;
+            bottom: 30px;
+            left: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #6a1b9a;
+            border: 2px solid #6a1b9a;
+            padding: 10px 25px;
+            font-size: 1.1em;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-pause:hover {
+            background: #6a1b9a;
+            color: white;
+        }
+
+        /* ========== 准备倒计时 ========== */
+        .countdown-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 600;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .countdown-overlay.active {
+            display: flex;
+        }
+
+        .countdown-number {
+            font-size: 12em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 40px rgba(236, 64, 122, 0.8);
+            animation: countPop 1s ease-in-out;
+        }
+
+        @keyframes countPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .countdown-text {
+            font-size: 2em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 20px;
+        }
+
+        /* ========== 时间到弹窗 ========== */
+        .timeup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 700;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timeup-overlay.active {
+            display: flex;
+        }
+
+        .timeup-content {
+            background: white;
+            border-radius: 24px;
+            padding: 50px 60px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .timeup-content h2 {
+            font-size: 3em;
+            color: #c2185b;
+            margin-bottom: 15px;
+        }
+
+        .timeup-content p {
+            font-size: 1.4em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .timeup-content .back-btn {
+            background: linear-gradient(135deg, #ec407a, #d81b60);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 1.3em;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .timeup-content .back-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 1100px) {
+            .teams-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .team-card {
+                width: 80%;
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2em;
+            }
+            .word-display {
+                font-size: 3.5em;
+                padding: 30px 40px;
+                min-width: auto;
+            }
+            .game-btn {
+                padding: 14px 30px;
+                font-size: 1.2em;
+            }
+        }
+
+        /* 装饰心形 */
+        .hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 1.5em;
+            opacity: 0.15;
+            animation: floatHeart linear infinite;
+        }
+
+        @keyframes floatHeart {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-10vh) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 装饰心形 -->
+    <div class="hearts" id="hearts"></div>
+
+    <!-- ========== 主页面 ========== -->
+    <div class="main-page" id="mainPage">
+        <button class="rules-btn" onclick="showRules()">📖 游戏规则</button>
+
+        <div class="header">
+            <h1>💒 你比划我猜 💒</h1>
+            <div class="subtitle">✨ 婚礼欢乐时刻 ✨</div>
+        </div>
+
+        <div class="teams-container">
+            <!-- 队伍1 -->
+            <div class="team-card">
+                <div class="team-icon">💗</div>
+                <span class="team-name-display" id="teamName1" onclick="editTeamName(1)">队伍一</span>
+                <input class="team-name-input" id="teamNameInput1" maxlength="10"
+                       onblur="saveTeamName(1)" onkeydown="if(event.key==='Enter')saveTeamName(1)">
+                <div class="score-section">
+                    <label>当前得分</label>
+                    <input type="number" class="score-input" id="score1" value="0" min="0">
+                </div>
+                <button class="start-btn" onclick="startGame(1)">🎯 开始比赛</button>
+            </div>
+
+            <!-- 队伍2 -->
+            <div class="team-card">
+                <div class="team-icon">💜</div>
+                <span class="team-name-display" id="teamName2" onclick="editTeamName(2)">队伍二</span>
+                <input class="team-name-input" id="teamNameInput2" maxlength="10"
+                       onblur="saveTeamName(2)" onkeydown="if(event.key==='Enter')saveTeamName(2)">
+                <div class="score-section">
+                    <label>当前得分</label>
+                    <input type="number" class="score-input" id="score2" value="0" min="0">
+                </div>
+                <button class="start-btn" onclick="startGame(2)">🎯 开始比赛</button>
+            </div>
+
+            <!-- 队伍3 -->
+            <div class="team-card">
+                <div class="team-icon">💛</div>
+                <span class="team-name-display" id="teamName3" onclick="editTeamName(3)">队伍三</span>
+                <input class="team-name-input" id="teamNameInput3" maxlength="10"
+                       onblur="saveTeamName(3)" onkeydown="if(event.key==='Enter')saveTeamName(3)">
+                <div class="score-section">
+                    <label>当前得分</label>
+                    <input type="number" class="score-input" id="score3" value="0" min="0">
+                </div>
+                <button class="start-btn" onclick="startGame(3)">🎯 开始比赛</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 游戏规则弹窗 ========== -->
+    <div class="modal-overlay" id="rulesModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideRules()">✕</button>
+            <h2>📖 游戏规则</h2>
+            <div class="rule-item">
+                <p>🎮 <strong>游戏形式</strong></p>
+                <p>每队派出两人比划，剩下的人猜。比划者可以用肢体动作和语言描述，但<strong>不能说出词语中的任何一个音及其翻译</strong>。</p>
+                <br>
+                <p>⏱️ <strong>时间限制</strong></p>
+                <p>每队有 <strong>5分钟</strong> 的比赛时间，倒计时结束后自动停止。</p>
+                <br>
+                <p>⏭️ <strong>Pass 机会</strong></p>
+                <p>每队有 <strong>3次 Pass 机会</strong>，遇到不会的词可以跳过。Pass 用完后只能继续猜。</p>
+                <br>
+                <p>✅ <strong>答对规则</strong></p>
+                <p>猜对一个词后，点击"答对了"按钮进入下一个词。裁判负责记录分数。</p>
+                <br>
+                <p>🏆 <strong>计分方式</strong></p>
+                <p>每答对一个词得 <strong>1分</strong>，Pass 不扣分。最终由裁判在主界面输入每队得分。</p>
+                <br>
+                <p>🚫 <strong>犯规说明</strong></p>
+                <p>比划者说出词语中的字视为犯规，该词不得分，直接跳到下一题。</p>
+                <br>
+                <p>🎉 <strong>获胜条件</strong></p>
+                <p>三队全部完成后，猜到词数最多的队伍获3分，第二名2分，第三名1分！</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 游戏界面 ========== -->
+    <div class="game-page" id="gamePage">
+        <div class="game-header">
+            <div class="game-team-name" id="gameTeamName">队伍一</div>
+            <div class="game-timer" id="gameTimer">05:00</div>
+            <div class="game-stats">
+                答对: <span id="correctCount">0</span> 题 | Pass: <span id="passCount">0</span>/3
+            </div>
+        </div>
+
+        <div class="word-display" id="wordDisplay">准备开始</div>
+
+        <div class="game-controls">
+            <button class="game-btn btn-correct" onclick="wordCorrect()">✅ 答对了</button>
+            <button class="game-btn btn-pass" id="passBtn" onclick="wordPass()">⏭️ Pass</button>
+                </div>
+
+        <button class="btn-pause" id="pauseBtn" onclick="togglePause()">⏸️ 暂停</button>
+        <button class="btn-end" onclick="endGame()">🔙 结束返回</button>
+    </div>
+
+    <!-- ========== 准备倒计时 ========== -->
+    <div class="countdown-overlay" id="countdownOverlay">
+        <div class="countdown-number" id="countdownNumber">3</div>
+        <div class="countdown-text" id="countdownTeam">队伍一 准备！</div>
+    </div>
+
+    <!-- ========== 时间到弹窗 ========== -->
+    <div class="timeup-overlay" id="timeupOverlay">
+        <div class="timeup-content">
+            <h2>⏰ 时间到！</h2>
+            <p id="timeupMsg">本轮共答对 0 题</p>
+            <button class="back-btn" onclick="backToMain()">返回主界面</button>
+        </div>
+    </div>
+
+    <script>
+        // ========== 词库（60个词）==========
+        const WORD_BANK = [
+            // 日常生活
+            '刷牙', '洗脸', '做饭', '拖地', '洗衣服',
+            '打电话', '自拍', '化妆', '吹头发', '敷面膜',
+            // 动物
+            '大象', '企鹅', '猴子', '孔雀', '螃蟹',
+            '兔子', '蛇', '鸭子', '老鹰', '金鱼',
+            // 运动 / 动作
+            '游泳', '打篮球', '跳绳', '瑜伽', '举重',
+            '踢足球', '打乒乓球', '滑雪', '跑步', '仰卧起坐',
+            // 影视 / 人物
+            '超人', '灰姑娘', '蜘蛛侠', '白雪公主', '孙悟空',
+            '哪吒', '机器猫', '葫芦娃', '奥特曼', '美人鱼',
+            // 婚礼相关
+            '求婚', '抛花束', '交杯酒', '婚礼进行曲',
+            '丘比特', '戒指', '亲亲', '公主抱', '比心',
+            // 搞笑表演
+            '醉酒', '模特走秀', '弹吉他', '唱歌', '打喷嚏',
+            '照镜子', '跳舞', '变魔术', '钓鱼', '骑马',
+            // 自定义
+            '抛媚眼', '小拳拳捶你胸口', '肚皮舞', '背对背拥抱',
+            '走钢丝', '匍匐前进', '翩翩起舞', '螺狮粉', '四脚朝天',
+            '母鸡', '回眸一笑', '汉堡包', '吃火锅',
+            '哭笑不得', '瞅你咋的', '画饼充饥', '盲人摸象', 'UFO',
+            '芭蕾舞', '大闸蟹', '隐形眼镜', '鸡飞狗跳',
+            '摘樱桃', '采蘑菇', '泡温泉', '打扑克', 'Lambo',
+            'Sev', '昂哥', '数码宝贝', '神奇宝贝',
+            '哈利波特', '猫和老鼠'
+        ];
+
+        // ========== 游戏状态 ==========
+        let currentTeam = 0;
+        let remainingWords = [...WORD_BANK];
+        let currentWord = '';
+        let timerInterval = null;
+        let timeLeft = 300; // 5分钟 = 300秒
+        let passLeft = 3;
+        let correctTotal = 0;
+        let isPaused = false;
+
+        // 初始化时打乱词库（所有队伍共享，用过的词不再出现）
+        shuffleArray(remainingWords);
+
+        // ========== 游戏规则 ==========
+        function showRules() {
+            document.getElementById('rulesModal').classList.add('active');
+        }
+
+        function hideRules() {
+            document.getElementById('rulesModal').classList.remove('active');
+        }
+
+        // 点击遮罩关闭
+        document.getElementById('rulesModal').addEventListener('click', function(e) {
+            if (e.target === this) hideRules();
+        });
+
+        // ========== 队名编辑 ==========
+        function editTeamName(teamNum) {
+            const display = document.getElementById('teamName' + teamNum);
+            const input = document.getElementById('teamNameInput' + teamNum);
+            input.value = display.textContent;
+            display.style.display = 'none';
+            input.style.display = 'inline-block';
+            input.focus();
+            input.select();
+        }
+
+        function saveTeamName(teamNum) {
+            const display = document.getElementById('teamName' + teamNum);
+            const input = document.getElementById('teamNameInput' + teamNum);
+            const name = input.value.trim();
+            if (name) {
+                display.textContent = name;
+            }
+            input.style.display = 'none';
+            display.style.display = 'inline-block';
+        }
+
+        // ========== 开始游戏 ==========
+        function startGame(teamNum) {
+            currentTeam = teamNum;
+            const teamName = document.getElementById('teamName' + teamNum).textContent;
+
+            // 初始化状态
+            timeLeft = 300;
+            passLeft = 3;
+            correctTotal = 0;
+            isPaused = false;
+
+            // 更新UI
+            document.getElementById('gameTeamName').textContent = teamName;
+            document.getElementById('correctCount').textContent = '0';
+            document.getElementById('passCount').textContent = '0';
+            updatePassBtn();
+            document.getElementById('pauseBtn').textContent = '⏸️ 暂停';
+
+            // 显示准备倒计时
+            document.getElementById('countdownTeam').textContent = teamName + ' 准备！';
+            document.getElementById('countdownOverlay').classList.add('active');
+
+            let count = 3;
+            document.getElementById('countdownNumber').textContent = count;
+
+            const countInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    document.getElementById('countdownNumber').textContent = count;
+                    // 重新触发动画
+                    const el = document.getElementById('countdownNumber');
+                    el.style.animation = 'none';
+                    el.offsetHeight; // trigger reflow
+                    el.style.animation = 'countPop 1s ease-in-out';
+                } else {
+                    clearInterval(countInterval);
+                    document.getElementById('countdownOverlay').classList.remove('active');
+
+                    // 进入游戏
+                    document.getElementById('mainPage').style.display = 'none';
+                    document.getElementById('gamePage').classList.add('active');
+
+                    nextWord();
+                    startTimer();
+                }
+            }, 1000);
+        }
+
+        // ========== 计时器 ==========
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    timeLeft--;
+                    updateTimerDisplay();
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        showTimeUp();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            const display = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            const timerEl = document.getElementById('gameTimer');
+            timerEl.textContent = display;
+
+            if (timeLeft <= 30) {
+                timerEl.classList.add('warning');
+            } else {
+                timerEl.classList.remove('warning');
+            }
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('pauseBtn');
+            if (isPaused) {
+                btn.textContent = '▶️ 继续';
+                document.getElementById('wordDisplay').textContent = '⏸️ 暂停中';
+            } else {
+                btn.textContent = '⏸️ 暂停';
+                document.getElementById('wordDisplay').textContent = currentWord;
+            }
+        }
+
+        // ========== 词语逻辑 ==========
+        function nextWord() {
+            if (remainingWords.length === 0) {
+                // 词库用完了
+                document.getElementById('wordDisplay').textContent = '词库已用完 🎉';
+                return;
+            }
+            currentWord = remainingWords.pop();
+            document.getElementById('wordDisplay').textContent = currentWord;
+        }
+
+        function wordCorrect() {
+            if (isPaused) return;
+            correctTotal++;
+            document.getElementById('correctCount').textContent = correctTotal;
+            nextWord();
+        }
+
+        function wordPass() {
+            if (isPaused) return;
+            if (passLeft <= 0) return;
+            passLeft--;
+            document.getElementById('passCount').textContent = (3 - passLeft);
+            updatePassBtn();
+            nextWord();
+        }
+
+        function updatePassBtn() {
+            const btn = document.getElementById('passBtn');
+            if (passLeft <= 0) {
+                btn.disabled = true;
+                btn.textContent = '⏭️ Pass (已用完)';
+            } else {
+                btn.disabled = false;
+                btn.textContent = '⏭️ Pass (剩' + passLeft + '次)';
+            }
+        }
+
+        // ========== 结束游戏 ==========
+        function showTimeUp() {
+            document.getElementById('timeupMsg').textContent =
+                document.getElementById('gameTeamName').textContent + ' 本轮共答对 ' + correctTotal + ' 题';
+            document.getElementById('timeupOverlay').classList.add('active');
+        }
+
+        function endGame() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            backToMain();
+        }
+
+        function backToMain() {
+            document.getElementById('timeupOverlay').classList.remove('active');
+            document.getElementById('gamePage').classList.remove('active');
+            document.getElementById('mainPage').style.display = 'block';
+        }
+
+        // ========== 工具函数 ==========
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+
+        // ========== 装饰心形动画 ==========
+        function createHearts() {
+            const container = document.getElementById('hearts');
+            const symbols = ['💕', '💗', '💖', '💝', '✨', '🌸'];
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('span');
+                heart.className = 'heart';
+                heart.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDuration = (8 + Math.random() * 12) + 's';
+                heart.style.animationDelay = Math.random() * 10 + 's';
+                heart.style.fontSize = (1 + Math.random() * 1.5) + 'em';
+                container.appendChild(heart);
+            }
+        }
+
+        createHearts();
+    </script>
+</body>
+</html>
