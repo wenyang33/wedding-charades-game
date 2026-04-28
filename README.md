@@ -1,5 +1,7 @@
 # 💒 你比划我猜 - 婚礼派对游戏
 
+🎯 **在线体验：[https://wenyang33.github.io/wedding-charades-game/](https://wenyang33.github.io/wedding-charades-game/)**
+
 一款专为婚礼现场设计的「你比划我猜」互动游戏 Web App，适合投影到大屏幕使用。
 
 ## 🎮 游戏特色
