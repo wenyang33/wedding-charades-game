@@ -613,7 +613,7 @@
                 <p>每队派出两人比划，剩下的人猜。比划者开始时可以说几个字的提示，比如"三个字"、"是一种吃的"，之后<strong>只能用肢体语言</strong>，不能再说话。</p>
                 <br>
                 <p>⏱️ <strong>时间限制</strong></p>
-                <p>每队有 <strong>5分钟</strong> 的比赛时间，倒计时结束后自动停止。</p>
+                <p>每队有 <strong>2分钟</strong> 的比赛时间，倒计时结束后自动停止。</p>
                 <br>
                 <p>⏭️ <strong>Pass 机会</strong></p>
                 <p>每队有 <strong>3次 Pass 机会</strong>，遇到不会的词可以跳过。Pass 用完后只能继续猜。</p>
@@ -637,7 +637,7 @@
     <div class="game-page" id="gamePage">
         <div class="game-header">
             <div class="game-team-name" id="gameTeamName">队伍一</div>
-            <div class="game-timer" id="gameTimer">05:00</div>
+            <div class="game-timer" id="gameTimer">02:00</div>
             <div class="game-stats">
                 答对: <span id="correctCount">0</span> 题 | Pass: <span id="passCount">0</span>/3
             </div>
@@ -696,9 +696,17 @@
             '母鸡', '回眸一笑', '汉堡包', '吃火锅',
             '哭笑不得', '瞅你咋的', '画饼充饥', '盲人摸象', 'UFO',
             '芭蕾舞', '大闸蟹', '隐形眼镜', '鸡飞狗跳',
-            '摘樱桃', '采蘑菇', '泡温泉', '打扑克', 'Lambo',
-            'Sev', '昂哥', '数码宝贝', '神奇宝贝',
-            '哈利波特', '猫和老鼠'
+            '摘樱桃', '采蘑菇', '泡温泉', '', 'Lambo',
+            'Sev', '昂哥', '数码宝贝',
+            '哈利波特', '猫和老鼠',
+            '周杰伦', '林俊杰', '特朗普', '普京', '美国',
+            '绿卡', 'H1B', 'EB2', 'OpenAI', 'Claude Code',
+            '马斯克', '宠物小精灵',
+            '我在马路边捡到一分钱', '大头儿子小头爸爸', '盗梦空间', 'Google',
+            '英伟达', '三国演义', '西游记', '红楼梦',
+            '太极拳', '情人眼里出西施', '有情人终成眷属', '网红', '白女',
+            '霸道总裁爱上我', '重生之我在湾区当码农', 'Coco', 'Saratoga', '非诚勿扰',
+            '双龙戏珠', '窈窕淑女，君子好逑', '双节棍'
         ];
 
         // ========== 游戏状态 ==========
@@ -706,7 +714,7 @@
         let remainingWords = [...WORD_BANK];
         let currentWord = '';
         let timerInterval = null;
-        let timeLeft = 300; // 5分钟 = 300秒
+        let timeLeft = 120; // 2分钟 = 120秒
         let passLeft = 3;
         let correctTotal = 0;
         let isPaused = false;
@@ -756,7 +764,7 @@
             const teamName = document.getElementById('teamName' + teamNum).textContent;
 
             // 初始化状态
-            timeLeft = 300;
+            timeLeft = 120;
             passLeft = 3;
             correctTotal = 0;
             isPaused = false;
